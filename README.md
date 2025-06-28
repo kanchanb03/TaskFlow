@@ -1,32 +1,146 @@
-# 📆 TaskFlow – iOS Productivity Suite  
+````markdown
+# 📈 Stock Market Tracker – Real-Time System  
 
-A Swift-powered iPhone app that merges task management, calendar syncing, and smart reminders into a sleek, tab-based dashboard. Designed to demonstrate clean UIKit architecture, Apple frameworks, and classic design patterns.
+A Java-based application that monitors live stock prices, pushes instant notifications, and showcases classic design-pattern architecture. Built for learning high-performance, concurrent programming concepts.
 
 ---
 
-## 💡 Highlights  
-* Unified dashboard, task list, calendar, and settings in one UITabBarController  
-* EventKit integration to write tasks straight to the user’s Apple Calendar  
-* Optional push-in-app alerts via UserNotifications for due-date nudges  
-* MVC style with lightweight `struct` models, view controllers per screen, and a **Singleton** `DataManager`  
-* 100 % programmatic auto-layout for pixel-perfect views across devices  
-* Dark / light theme toggle at runtime
+## 💡 Key Features  
+* Real-time price updates for multiple tickers  
+* Multithreaded data-fetching and event dispatching for snappy UI / CLI feedback  
+* **Observer** pattern to broadcast price changes to any number of listeners (GUI, CLI, logging, alerts)  
+* **Singleton** pattern for the core `MarketDataHub`, guaranteeing one source of truth  
+* Fast in-memory storage with `HashMap<String, Stock>` for O(1) look-ups and updates  
+* Clean, modular packages that mirror a distributed micro-service design (data-ingest ▶ processing ▶ notification)
 
 ---
 
 ## 🔧 Tech Stack  
 | Layer | Technology |
 |-------|------------|
-| Language | Swift 5 |
-| IDE | Xcode 15.x (.xcodeproj + Storyboard) |
-| UI | UIKit, Auto-Layout, SF Symbols |
-| APIs | EventKit, UserNotifications |
-| Patterns | MVC, Singleton |
-| Tests | XCTest (unit tests stubbed in `TaskflowTests`) |
+| Language | Java 17 (works with 11+) |
+| Build | Maven or Gradle |
+| Concurrency | `java.util.concurrent` (Executors, Locks) |
+| Testing | JUnit 5 & Mockito |
+| Logging | SLF4J + Logback |
 
 ---
 
 ## 🚀 Quick Start  
+
+```bash
+# 1. Clone the repo
+git clone https://github.com/your-username/stock-market-tracker.git
+cd stock-market-tracker
+
+# 2. Build
+mvn clean package          # or: ./gradlew build
+
+# 3. Run
+java -jar target/stock-tracker-1.0.jar        # default CLI mode
+# or launch the demo Swing UI
+java -cp target/stock-tracker-1.0.jar ui.SwingDashboard
+````
+
+Default tickers live in `config/tickers.json`; edit and restart to track other symbols.
+
+---
+
+## 🏗️ Architecture Overview
+
+```
+┌────────────┐       notifies        ┌───────────────┐
+│  DataFeed  │ ───────────────▶ │   MarketDataHub │◀─┐
+└────────────┘                    └───────────────┘  │Singleton  
+      ▲    fetches                         │          │  
+      │                                     ▼ Observer
+┌────────────┐       updates        ┌─────────────────┐
+│  Scheduler │────────────────────▶│  Subscribers…   │
+└────────────┘                     │  • CLIView      │
+   ExecutorService                 │  • SwingDashboard│
+                                   │  • EmailAlert   │
+                                   └─────────────────┘
+```
+
+---
+
+## 📝 Usage Examples
+
+```java
+// Create a custom listener
+PriceListener logger = (symbol, price) ->
+    System.out.printf("%s -> $%.2f%n", symbol, price);
+
+// Register it
+MarketDataHub.getInstance().subscribe(logger);
+
+// Dynamically add a new ticker
+MarketDataHub.getInstance().addSymbol("TSLA");
+```
+
+---
+
+## ✅ Tests
+
+```bash
+mvn test
+```
+
+Mocks the data feed for repeatable, offline unit tests.
+
+---
+
+## 🤝 Contributing
+
+1. Fork and create a feature branch
+2. Keep code readable and tested (`mvn spotless:apply`)
+3. Open a pull request describing **what** and **why**
+
+---
+
+## 📄 License
+
+MIT – see `LICENSE`.
+
+---
+
+## 🙋‍♀️ Questions?
+
+Open an issue or join the Discussions tab. Happy coding!
+
+---
+
+# 📆 TaskFlow – iOS Productivity Suite
+
+A Swift-powered iPhone app that merges task management, calendar syncing, and smart reminders into a sleek, tab-based dashboard. Designed to demonstrate clean UIKit architecture, Apple frameworks, and classic design patterns.
+
+---
+
+## 💡 Highlights
+
+* Unified dashboard, task list, calendar, and settings in one UITabBarController
+* EventKit integration to write tasks straight to the user’s Apple Calendar
+* Optional push in-app alerts via UserNotifications for due-date nudges
+* MVC style with lightweight `struct` models, view controllers per screen, and a **Singleton** `DataManager`
+* 100 percent programmatic auto-layout for pixel-perfect views across devices
+* Dark / light theme toggle at runtime
+
+---
+
+## 🔧 Tech Stack
+
+| Layer    | Technology                         |
+| -------- | ---------------------------------- |
+| Language | Swift 5                            |
+| IDE      | Xcode 15 (.xcodeproj + Storyboard) |
+| UI       | UIKit, Auto-Layout, SF Symbols     |
+| APIs     | EventKit, UserNotifications        |
+| Patterns | MVC, Singleton                     |
+| Tests    | XCTest (`TaskFlowTests`)           |
+
+---
+
+## 🚀 Quick Start
 
 ```bash
 # 1. Clone
@@ -34,15 +148,19 @@ git clone https://github.com/your-username/TaskFlow.git
 cd TaskFlow
 
 # 2. Open in Xcode
-open TaskFlow.xcodeproj   # or: xed .
+open TaskFlow.xcodeproj    # or: xed .
 
 # 3. Build & run
-Choose “TaskFlow” scheme ➡️ press ▶️ to launch on Simulator or device
+Select “TaskFlow” scheme → press ▶ to launch on Simulator or device
+```
+
+First launch requests Calendar and Notification permissions—grant both to unlock all features.
+
 ---
 
 ## 🏗️ Architecture Overview
----
 
+```
 ┌─────────────────┐   owns arrays   ┌───────────────────┐
 │   DataManager   │◀──────────────▶│   Task / Event    │
 └─────────────────┘   Singleton     └───────────────────┘
@@ -57,39 +175,50 @@ Choose “TaskFlow” scheme ➡️ press ▶️ to launch on Simulator or devic
 └─────────────────┘            │      ▼
        UIKit ViewControllers   └───────────────┐
                          UITabBarController ◀─┘
-DataManager – central in-memory store for tasks and events.
-DashboardVC – high-level stats and quick-add buttons.
-TaskManagerVC – table view for tasks with priority picker.
-CalendarVC – Month grid backed by EventKit.
-SettingsVC – theme toggle, notification options.
+```
+
+---
+
 ## 📝 Code Snippets
 
-// Add a new task and schedule a reminder
-let task = Task(title: "Finish README",
+```swift
+// Add a task and schedule a reminder
+let task = Task(title: "Ship v1.0",
                 due: Date().addingTimeInterval(3600),
                 priority: .high)
 
 DataManager.shared.add(task)
 NotificationManager.schedule(task)
 
-// Switch to dark mode
+// Toggle dark mode
 overrideUserInterfaceStyle = .dark
-✅ Running Tests
-
-⌘U  # inside Xcode
-Unit tests validate model logic and singleton data consistency.
+```
 
 ---
+
+## ✅ Tests
+
+Run all tests from Xcode: **Product ▸ Test** or ⌘U.
+
+---
+
 ## 🤝 Contributing
+
+1. Fork → create a feature branch
+2. Follow SwiftLint rules (`brew install swiftlint`)
+3. Submit a pull request with context and screenshots
+
 ---
 
-Fork → create feature branch
-Follow SwiftLint style rules (brew install swiftlint)
-Submit a pull request with context and screenshots
+## 📄 License
+
+MIT – see `LICENSE`.
 
 ---
 
-🙋‍♂️ Questions / Feedback
----
+## 🙋‍♂️ Questions?
 
-Open an issue or join the discussion board. Happy building!
+Open an issue or post in Discussions. Happy building!
+
+```
+```
