@@ -40,7 +40,7 @@ open TaskFlow.xcodeproj   # or: xed .
 Choose “TaskFlow” scheme ➡️ press ▶️ to launch on Simulator or device
 ---
 
-🏗️ Architecture Overview
+## 🏗️ Architecture Overview
 ---
 
 ┌─────────────────┐   owns arrays   ┌───────────────────┐
@@ -62,7 +62,7 @@ DashboardVC – high-level stats and quick-add buttons.
 TaskManagerVC – table view for tasks with priority picker.
 CalendarVC – Month grid backed by EventKit.
 SettingsVC – theme toggle, notification options.
-📝 Code Snippets
+## 📝 Code Snippets
 
 // Add a new task and schedule a reminder
 let task = Task(title: "Finish README",
@@ -80,7 +80,7 @@ overrideUserInterfaceStyle = .dark
 Unit tests validate model logic and singleton data consistency.
 
 ---
-🤝 Contributing
+## 🤝 Contributing
 ---
 
 Fork → create feature branch
